@@ -8,8 +8,8 @@ import { TaskInput } from './components/TaskInput';
 import { LessonPath } from './components/LessonPath';
 import { AIChat } from './components/AIChat';
 import { Settings } from './components/Settings';
-import { SqlEditor } from './components/SqlEditor';
 import { Auth } from './components/Auth';
+import { Landing } from './components/Landing';
 import { ProgressCalendar } from './components/ProgressCalendar';
 import { Community } from './components/Community';
 import { Messenger } from './components/Messenger';
@@ -37,10 +37,12 @@ const INITIAL_PROFILE: UserProfile = {
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState<'home' | 'lessons' | 'coach' | 'community' | 'messenger' | 'profile' | 'lab' | 'settings'>('home');
+  const [showAuth, setShowAuth] = useState(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'lessons' | 'coach' | 'community' | 'messenger' | 'profile' | 'settings'>('home');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recoveryMode, setRecoveryMode] = useState(false);
+  const [targetChatUserId, setTargetChatUserId] = useState<string | null>(null);
   
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('focusflow_stats');
@@ -66,7 +68,6 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : INITIAL_PROFILE;
   });
 
-  // CRITICAL: Forces the profile to update last_active immediately on login/activity
   const updateHeartbeat = async (userId: string) => {
     if (!userId) return;
     try {
@@ -139,17 +140,15 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Sync heartbeat whenever the active tab changes to ensure "Online" status is fresh
   useEffect(() => {
     if (user?.id) {
       updateHeartbeat(user.id);
     }
   }, [activeTab]);
 
-  // Heartbeat loop for cross-device discovery
   useEffect(() => {
     if (!user?.id) return;
-    const interval = setInterval(() => updateHeartbeat(user.id), 45000); // 45 seconds
+    const interval = setInterval(() => updateHeartbeat(user.id), 45000);
     return () => clearInterval(interval);
   }, [user, userProfile]);
 
@@ -169,7 +168,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem('focusflow_profile', JSON.stringify(userProfile));
-    // Also sync on profile change
     if (user?.id) updateHeartbeat(user.id);
   }, [userProfile, user]);
 
@@ -195,6 +193,11 @@ const App: React.FC = () => {
       };
     });
   }, []);
+
+  const handleStartChat = (userId: string) => {
+    setTargetChatUserId(userId);
+    setActiveTab('messenger');
+  };
 
   const handleCreateMission = async (taskName: string) => {
     setLoading(true);
@@ -248,7 +251,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleClearData = () => {
-    if (confirm("Are you sure? This will reset all your progress, missions, and stats!")) {
+    if (confirm("Are you sure? This will reset all your progress on this device.")) {
       setStats(INITIAL_STATS);
       setMissions([]);
       setActivities([]);
@@ -268,15 +271,18 @@ const App: React.FC = () => {
     );
   }
 
-  if (!user || recoveryMode) {
-    return <Auth recoveryMode={recoveryMode} onCompleteRecovery={() => setRecoveryMode(false)} />;
+  if (!user) {
+    if (showAuth || recoveryMode) {
+      return <Auth recoveryMode={recoveryMode} onCompleteRecovery={() => setRecoveryMode(false)} />;
+    }
+    return <Landing onGetStarted={() => setShowAuth(true)} />;
   }
 
   return (
     <Layout>
       {(activeTab === 'home' || activeTab === 'lessons') && <Header stats={stats} />}
       
-      <div className={`mx-auto pb-32 transition-all duration-500 pt-6 ${activeTab === 'coach' || activeTab === 'settings' || activeTab === 'lab' || activeTab === 'community' || activeTab === 'messenger' || activeTab === 'profile' ? 'max-w-full min-h-screen pt-0' : 'max-w-2xl'}`}>
+      <div className={`mx-auto pb-48 transition-all duration-500 pt-6 ${activeTab === 'coach' || activeTab === 'settings' || activeTab === 'community' || activeTab === 'messenger' || activeTab === 'profile' ? 'max-w-full min-h-screen pt-0' : 'max-w-2xl'}`}>
         {activeTab === 'home' ? (
           <div className="animate-slide-up space-y-8 px-4">
             <div className="flex justify-between items-center">
@@ -344,7 +350,6 @@ const App: React.FC = () => {
             <div className="space-y-6 pt-4">
                <div className="flex items-center justify-between px-2">
                  <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">Practice Log</h3>
-                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">History</span>
                </div>
                <ProgressCalendar activities={activities} />
             </div>
@@ -357,18 +362,11 @@ const App: React.FC = () => {
         ) : activeTab === 'coach' ? (
           <AIChat />
         ) : activeTab === 'community' ? (
-          <Community userProfile={userProfile} user={user} />
+          <Community userProfile={userProfile} user={user} onStartChat={handleStartChat} />
         ) : activeTab === 'messenger' ? (
-          <Messenger user={user} userProfile={userProfile} />
+          <Messenger user={user} userProfile={userProfile} initialTargetId={targetChatUserId} onClearTarget={() => setTargetChatUserId(null)} />
         ) : activeTab === 'profile' ? (
-          <Profile 
-            profile={userProfile} 
-            stats={stats} 
-            activities={activities} 
-            setProfile={setUserProfile} 
-          />
-        ) : activeTab === 'lab' ? (
-          <SqlEditor />
+          <Profile profile={userProfile} stats={stats} activities={activities} setProfile={setUserProfile} />
         ) : activeTab === 'settings' ? (
           <Settings 
             theme={theme} 
@@ -382,59 +380,36 @@ const App: React.FC = () => {
 
       <div className="fixed bottom-6 left-0 right-0 px-6 z-[90]">
         <nav className="max-w-lg mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-2 py-2 flex justify-around items-center shadow-2xl rounded-[3rem] border border-gray-100 dark:border-white/5 ring-1 ring-black/5">
-          <button 
-            onClick={() => setActiveTab('home')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'home' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'home' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}>
             <span className="text-2xl">🏠</span>
             <span className="text-[8px] font-black uppercase tracking-tight">Home</span>
           </button>
-
-          <button 
-            onClick={() => setActiveTab('community')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'community' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setActiveTab('community')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'community' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}>
             <span className="text-2xl">🌐</span>
             <span className="text-[8px] font-black uppercase tracking-tight">Feed</span>
           </button>
-
-          <button 
-            onClick={() => setActiveTab('messenger')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'messenger' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setActiveTab('messenger')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'messenger' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}>
             <span className="text-2xl">💬</span>
             <span className="text-[8px] font-black uppercase tracking-tight">Chats</span>
           </button>
           
-          <button 
-            onClick={() => setActiveTab('profile')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'profile' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setActiveTab('coach')} className={`w-14 h-14 rounded-full flex items-center justify-center transition-all bg-purple-600 text-white shadow-lg active:scale-95 ${activeTab === 'coach' ? 'scale-110' : 'opacity-80'}`}>
+            <Logo size={40} dark />
+          </button>
+          
+          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'profile' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}>
             <span className="text-2xl">👤</span>
             <span className="text-[8px] font-black uppercase tracking-tight">Profile</span>
           </button>
           
-          <button 
-            onClick={() => setActiveTab('coach')}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all bg-purple-600 text-white shadow-lg active:scale-95 ${activeTab === 'coach' ? 'scale-110' : 'opacity-80'}`}
-          >
-            <Logo size={40} dark />
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('lessons')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'lessons' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setActiveTab('lessons')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'lessons' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}`}>
             <span className="text-2xl">📚</span>
             <span className="text-[8px] font-black uppercase tracking-tight">Quiz</span>
           </button>
 
-          <button 
-            onClick={() => setActiveTab('lab')}
-            className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'lab' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-gray-400'}`}
-          >
-            <span className="text-2xl">🗄️</span>
-            <span className="text-[8px] font-black uppercase tracking-tight">SQL Editor</span>
+          <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1 transition-all px-3 py-2 rounded-full ${activeTab === 'settings' ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'text-gray-400'}`}>
+            <span className="text-2xl">⚙️</span>
+            <span className="text-[8px] font-black uppercase tracking-tight">Settings</span>
           </button>
         </nav>
       </div>

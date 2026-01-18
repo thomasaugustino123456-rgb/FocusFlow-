@@ -1,35 +1,42 @@
 
-# 🔮 FocusFlow - AI Study Coach
+# 🔮 JustStart - AI Study Sidekick
 
-FocusFlow is a minimalist, gamified productivity app designed for students and teens. It helps you crush procrastination by breaking down big, scary tasks into tiny, manageable "Missions" using the power of Google Gemini AI.
+JustStart is a high-end, gamified productivity app designed for students and teens. It helps you crush procrastination by breaking down big, scary tasks into tiny, manageable "Missions" using Google Gemini AI.
 
-## ✨ Key Features
+## 🚀 Deployment Checklist (Vercel)
 
-- **🎯 AI Mission Builder**: Turn any goal into a step-by-step plan.
-- **🦉 Starty Coach**: A real-time AI tutor that can search the web and talk back to you.
-- **🎮 Gamified XP**: Earn points, level up, and maintain streaks.
-- **📚 Skill Quizzes**: Learn life skills and tech basics through interactive units.
-- **🧪 Database Lab**: A built-in SQL environment to see your data sync in real-time.
+Deploying this app takes less than 2 minutes. Follow these steps exactly:
+
+### 1. Prepare your GitHub
+- Create a new repository on [GitHub.com](https://github.com) named `JustStart`.
+- Upload all files from this project to that repository.
+
+### 2. Connect to Vercel
+- Sign in to [Vercel.com](https://vercel.com) using your GitHub account.
+- Click **"Add New"** then **"Project"**.
+- Find your `JustStart` repository and click **"Import"**.
+
+### 3. THE MOST IMPORTANT STEP (API Key)
+The app **will not work** without your Gemini API Key. 
+- In the Vercel "Configure Project" screen, look for the **Environment Variables** section.
+- Add a new variable:
+  - **Key**: `API_KEY`
+  - **Value**: (Paste your Gemini API Key here)
+- Get a free key at [aistudio.google.com](https://aistudio.google.com).
+
+### 4. Deploy!
+- Click **"Deploy"**.
+- Vercel will give you a link like `just-start.vercel.app`. You are now live!
+
+## ✨ Pro Tips for Students
+- **Dark Mode**: The app automatically detects your system settings, but you can toggle it in the Settings tab.
+- **Supabase**: Your data (Posts, Stories, Messages) is synced to a real database. You can manage this in the "Persistence Lab" section of the code.
+- **Mobile First**: This app is designed to look amazing on your phone. Add the Vercel link to your home screen for the best experience.
 
 ## 🛠️ Technology Stack
-
-- **Frontend**: React (Native ESM) + Tailwind CSS
-- **AI**: Google Gemini API (@google/genai)
-- **Backend**: Supabase (Authentication & Database)
-
-## 🚀 How to Make it Live (Deployment)
-
-Since this app uses modern ESM modules, it's very easy to host:
-
-1. **Upload to GitHub**: Put all these files into a GitHub repository.
-2. **Connect to Vercel**: 
-   - Go to [Vercel.com](https://vercel.com) and sign in with GitHub.
-   - Click **Add New** > **Project**.
-   - Import your `FocusFlow` repo.
-3. **Set your API Key**:
-   - During setup, find the **Environment Variables** section.
-   - Add a key named `API_KEY` and paste your Gemini API Key as the value.
-4. **Deploy**: Click Deploy! Your app will be live on a custom URL (e.g., `focus-flow.vercel.app`).
+- **Frontend**: React + Tailwind CSS (2025 Modern Mobile Design)
+- **AI**: Google Gemini 3 (Flash & Pro)
+- **Backend**: Supabase (Auth & Realtime Database)
 
 ---
-*Created with ❤️ for FocusFlow users.*
+*Built with ❤️ for the next generation of high-performers.*

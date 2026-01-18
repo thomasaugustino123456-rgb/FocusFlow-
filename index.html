@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow - Smart Gateway</title>
+    <title>JustStart - AI Study Sidekick</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -14,6 +14,9 @@
             fontFamily: {
               sans: ['Plus Jakarta Sans', 'sans-serif'],
             },
+            animation: {
+              'spin-slow': 'spin 8s linear infinite',
+            }
           }
         }
       }
@@ -60,11 +63,17 @@
             box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
         }
 
-        .bouncy {
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            filter: blur(10px);
+            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .bouncy:active {
-            transform: scale(0.95);
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
         }
 
         @keyframes float {
@@ -91,23 +100,9 @@
             scrollbar-width: none;
         }
         
-        /* Ensure all theme-aware elements transition smoothly */
         *, *::before, *::after {
             transition-property: background-color, border-color, color, fill, stroke;
             transition-duration: 300ms;
-        }
-
-        .sql-editor-line {
-            counter-increment: line;
-        }
-        .sql-editor-line::before {
-            content: counter(line);
-            display: inline-block;
-            width: 2rem;
-            margin-right: 1rem;
-            color: #4b5563;
-            text-align: right;
-            user-select: none;
         }
     </style>
 <script type="importmap">
