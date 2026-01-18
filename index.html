@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow - Smart Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5145cd;
+            --primary-soft: #f3f0ff;
+            --bg-gradient: linear-gradient(135deg, #fdfbff 0%, #f3f0ff 100%);
+            --text-main: #1a1a1a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        .dark {
+            --primary: #818cf8;
+            --primary-soft: #1e1b4b;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --text-main: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 10px 40px -10px rgba(81, 69, 205, 0.1);
+        }
+
+        .dark .shadow-soft {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+        }
+
+        .bouncy {
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bouncy:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Ensure all theme-aware elements transition smoothly */
+        *, *::before, *::after {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-duration: 300ms;
+        }
+
+        .sql-editor-line {
+            counter-increment: line;
+        }
+        .sql-editor-line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2rem;
+            margin-right: 1rem;
+            color: #4b5563;
+            text-align: right;
+            user-select: none;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+</head>
+<body class="overflow-x-hidden min-h-screen">
+    <div id="root"></div>
+</body>
+</html>
